@@ -1,1 +1,1 @@
-# staik_staking_page
+Staik token presale frontend
