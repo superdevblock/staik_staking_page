@@ -8,9 +8,9 @@ let weth_abi        = require("./ABI/weth.json");
 let wbtc_abi        = require("./ABI/wbtc.json");
 
 export const TOKEN_NAME = "Staik";
-export const TOKEN_CONTRACT_ADDRESS = "0x029F758eE05f052EC039104373234eAA18bd5317";
-export const TOKEN_STAKING_ADDRESS = "0x8536631d336D831c1C5D837b56A0a17441A0bDe2";
-export const LANGDING_URL = "https://fidarzi.com/"; 
+export const TOKEN_CONTRACT_ADDRESS = "0xD1E1B33EC6229F6FDb9d282C580e84273aeaD970";
+export const TOKEN_STAKING_ADDRESS = "0x2204Aaf25D25775954b2bdEAfB15a2F75Ea360e2";
+export const LANGDING_URL = "https://staik.io/"; 
 
 export const config = {
     chainId: 97, //Fuji testnet : 43113, mainnet : 43114.  bsctestnet : 97, Rikeby: 4
@@ -21,8 +21,8 @@ export const config = {
     // mainNetUrl: 'https://rinkeby.infura.io/v3/',
     mainNetUrl: 'https://bsc-dataseed.binance.org/',
     
-    PresaleFactoryAddress : "0xD9078f6F4078B37CBAA81C96956e5C6231a62106", // PresaleFactory
-    PresaleFactoryAbi : presale_abi,
+    // PresaleFactoryAddress : "0xD9078f6F4078B37CBAA81C96956e5C6231a62106", // PresaleFactory
+    // PresaleFactoryAbi : presale_abi,
     
     FiziAddress: TOKEN_CONTRACT_ADDRESS,
     FiziAbi: Token_abi,
