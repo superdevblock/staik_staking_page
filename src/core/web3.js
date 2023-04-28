@@ -862,7 +862,7 @@ export const getLastStakeTime = async() => {
 
     return {
       success: true,
-      lastStakeTime: 1677423600
+      lastStakeTime: lastTime
     }
   } catch (error) {
     return {
