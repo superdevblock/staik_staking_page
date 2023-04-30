@@ -4,16 +4,11 @@ import styled, { createGlobalStyle } from 'styled-components';
 import { useMediaQuery } from 'react-responsive';
 import Modal from 'react-modal';
 import Reveal from 'react-awesome-reveal';
-import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
-import "react-circular-progressbar/dist/styles.css";
-import IconButton from '@mui/material/IconButton';
 import ReactLoading from "react-loading";
 import LoadingButton from '@mui/lab/LoadingButton';
 import { toast } from 'react-toastify';
-import Clock from '../components/Presale/Clock';
-import SelectCoin from '../components/Presale/SelectCoin';
 import * as selectors from '../store/selectors';
-import { fadeIn, fadeInUp, getUTCNow, getUTCDate, numberWithCommas, LoadingSkeleton, isEmpty } from '../components/utils';
+import { fadeIn, fadeInUp, isEmpty } from '../components/utils';
 import {
   getTotalStakedAmount,
   getTotalStakedAccount,
@@ -21,24 +16,13 @@ import {
   getTokenBalanceOfAcocunt,
   StakingToken,
   showClaimToken,
+  approveTokens,
   getClaimToken,
   UnstakingToken,
-
-  getTotalPresaleAmount,
-  getpTokenPriceForUSDT,
-  getBUSDForBNB,
-  getUserPaidUSDT,
-  getStartPresaleTime,
-  getEndPresaleTime,
-  buy_pToken,
-  approveTokens,
-  getBalanceOfAccount,
-  getWethPrice,
-  getWbtcPrice,
   getLastStakeTime
 } from '../core/web3';
 
-import { TOKEN_NAME, TOKEN_CONTRACT_ADDRESS, config, def_config } from '../core/config';
+import { TOKEN_NAME } from '../core/config';
 import Swal from 'sweetalert2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faAddressBook, faChartSimple, faUsersViewfinder } from '@fortawesome/free-solid-svg-icons'
@@ -49,29 +33,6 @@ const tabItems = [
   { title: 'Unstaking' },
   { title: 'Claim' }
 ];
-
-const customStyles = {	
-  content: {	
-    top: '50%',	
-    left: '50%',	
-    right: 'auto',	
-    bottom: 'auto',	
-    marginLight: '-50%',	
-    marginRight: '-50%',	
-    transform: 'translate(-50%, -50%)',	
-    maxWidth: '500px',	
-    width: '80%',	
-    cursor: 'pointer',	
-    backgroundColor: '#2e2568',	
-    borderRadius: '15px',	
-    color: '#FFFFFF',
-    maxHeight: '70vh'
-  },	
-  overlay: {	
-    backgroundColor: 'transparent',	
-    cursor: 'pointer',
-  }	
-};	
 
 const GlobalStyles = createGlobalStyle`
   .main {
@@ -327,75 +288,23 @@ const Loading = styled('div')`
   gap: 15px;
 `;
 
-const help_style = {	
-  padding: "10px",	
-  paddingLeft: "20px",	
-  paddingRight: "20px",	
-  borderRadius: "30px",	
-  border: "1px solid"	
-};
-
-/**
- * @author arsinoe
- * @abstract presale main frontend
- */
 const TokenStaking = (props) => {
-  /*  */
   const [totalStakedAmount, setTotalStakedAmount] = useState(0);
   const [totalStakedAccount, setTotalStakedAccount] = useState(0);
   const [stakedAmount, setStakedAmount] = useState(0);
   const [balanceAmount, setBalanceAmount] = useState(0);
   const [claimToken, setClaimToken] = useState(0);
   const [lastStakeTime, setLastStakeTime] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
 
-  const max_token_amount    = def_config.MAX_PRESALE_AMOUNT;                  // Presale Max Amount
-  const balance             = useSelector(selectors.userBalance);             // user wallet balance
-  const ethApproveState     = useSelector(selectors.userETHApproveState);     //  
-  const usdtApproveState    = useSelector(selectors.userUSDTApproveState);    // 
-  const busdApproveState    = useSelector(selectors.userBUSDApproveState);    // 
-  const btcbApproveState    = useSelector(selectors.userBTCBApproveState);    // 
-
-  const approveState        = useSelector(selectors.userApproveState);
-
-  const wallet              = useSelector(selectors.userWallet);              // user wallet
-  const web3                = useSelector(selectors.web3State);               // 
-  
-  const isMobile            = useMediaQuery({ maxWidth: '768px' });           // responsive mobile
-
-  const [amountPercent, setAmountPercent]       = useState(0);                // sale percent
-  const [curPresale, setCurPresale]             = useState('');
-  const [capPercent, setCapPercent]             = useState('');
-  const [usdtPrice, setusdTPrice]               = useState('');
-  const [maxCap, setMaxCap]                     = useState(0);                // USD
-  const [minCap, setMinCap]                     = useState(0);                // USDT
-  const [maxTotalCap, setMaxTotalCap]           = useState('');               // USDT
-  const [leftCap, setLeftCap]                   = useState('');               // 
-  const [paidUSDT, setPaidUSDT]                 = useState(0);                // paid USDT
-  const [pFiziAmount, setPFiziAmount]           = useState();
-  const [toBNBPrice, settoBNBPrice]             = useState(0);
-  const [maxBNBCap, setmaxBNBCap]               = useState('');
-  const [coinType, setCoinType]                 = useState(0);
-  const [startTime, setStartTime]               = useState(0);
-  const [endTime, setEndTime]                   = useState(0);
+  const approveState                            = useSelector(selectors.userApproveState);
+  const wallet                                  = useSelector(selectors.userWallet);              // user wallet
+  const web3                                    = useSelector(selectors.web3State);               // 
   const [loading, setLoading]                   = useState(false);
-  const [pending, setPending]                   = useState(false);
-  
-  const [fiziBalance, setFiziBalance]           = useState(0);                // balance of TOKEN
-  const [bnbBalance, setBnbBalance]             = useState(0);                // balance of BNB
-  const [busdBalance, setBusdBalance]           = useState(0);                // balance of BUSD
-  const [usdtBalance, setUsdtBalance]           = useState(0);                // balance of USDT
-  const [wethBalance, setWethBalance]           = useState(0);                // balance of WETH
-  const [wbtcBalance, setWbtcBalance]           = useState(0);                // balance of WBTC
-  
+  const [pending, setPending]                   = useState(false); 
   const [tokenAmountA, setTokenAmountA]         = useState('');
-  const [fromBalance, setFromBalance]           = useState(0);
-  const [toBalance, setToBalance]               = useState(0);
-  const [ended, setEnded]                       = useState(false);
   const [started, setStarted]                   = useState(false);
-  const [modalIsOpen, setIsOpen]                = useState(false);
-
   const [activeTab, setActiveTab] = useState(0);
-
   const [xData, setXData]                       = useState([]);
   const [yData, setYData]                       = useState([]);  
   /* ******************************************* INIT ******************************************* */
@@ -404,21 +313,16 @@ const TokenStaking = (props) => {
 
     setLoading(true); // loading
 
-    let tempusdtPrice     = 0;
-    let totalMaxCap       = 0;
-    let tempPaidUSDT      = 0;
-    let tempCurPresale    = 0;
-    let tempLeftCap       = 0;
     let result            = null;
     /* ******************************************* GET TOTAL STAKED TOKEN AMOUNT ******************************************* */ 
-    result = await getTotalStakedAmount(); // get presale start time from smart contract
+    result = await getTotalStakedAmount();
     if (result.success) {
       setTotalStakedAmount(Number(result.totalToken));
     } else {
       return;
     }
     /* ******************************************* GET TOTAL STAKED TOKEN ACCOUNT ******************************************* */ 
-    result = await getTotalStakedAccount(); // get presale start time from smart contract
+    result = await getTotalStakedAccount(); 
     if (result.success) {
       setTotalStakedAccount(Number(result.totalAccount));
     } else {
@@ -427,6 +331,11 @@ const TokenStaking = (props) => {
     /* ******************************************* GET STAKED TOKEN AMOUNT ******************************************* */ 
     result = await getStakedAmountOfAccount();
     if (result.success) {
+      if (result.stakedAmount === 0)
+        setStarted(false);
+      else
+        setStarted(true);
+
       setStakedAmount(Number(result.stakedAmount));
     } else {
       return;
@@ -448,192 +357,55 @@ const TokenStaking = (props) => {
     /* ******************************************* GET REWARD TOKEN ******************************************* */ 
     result = await getLastStakeTime();
     if (result.success) {
-      setLastStakeTime(Number(result.lastStakeTime));
+
+      if (result.lastStakeTime === 0 ) {
+        setXData([]);
+        setYData([]);  
+      } else {
+        /// 
+        const diffInseconds = currentTime - lastStakeTime;
+        let diffInDays = diffInseconds / (60 * 60 * 24);
+        diffInDays = parseInt(diffInDays);
+        
+        let labels = [];
+        let rewarddata = [];
+        
+        let startDate = new Date();
+        for (let i = diffInDays; i >= 0; i--) {
+          const currentDayOfMonth = startDate.getDate();
+          startDate.setDate(currentDayOfMonth - 1);
+          labels[i] = startDate.toDateString();
+          
+          rewarddata[i] = stakedAmount + stakedAmount * 0.0015 * i;
+        }
+        
+        console.log(labels);
+        console.log(rewarddata);
+        
+        setXData(labels);
+        setYData(rewarddata);
+        
+        setLastStakeTime(Number(result.lastStakeTime));
+        setCurrentTime(Number(result.currentTime));
+      }
     } else {
       return;
     }   
-    // get day count 
-    const todayTimestamp = Date.now();
-    const diffInMilliseconds = todayTimestamp - (lastStakeTime * 1000);
-    let diffInDays = diffInMilliseconds / (1000 * 60 * 60 * 24);
-    diffInDays = parseInt(diffInDays);
-
-    console.log(diffInDays);
-    // get data
-    let labels = [];
-    let rewarddata = [];
-
-    let startDate = new Date(lastStakeTime * 1000);
-    for (let i = 0; i < diffInDays; i++) {
-      const currentDayOfMonth = startDate.getDate();
-      startDate.setDate(currentDayOfMonth + 1);
-      labels[i] = startDate.toDateString();
-
-      rewarddata[i] = stakedAmount + stakedAmount * 0.0015 * i;
-    }
-
-    console.log(labels, rewarddata);
-
-    setXData(labels);
-    setYData(rewarddata);
-
-    console.log(xData, yData);
-
-    /* ******************************************* GET PRESALE START TIME ******************************************* */ 
-    result = await getStartPresaleTime(); // get presale start time from smart contract
-    if (result.success) {
-      setStartTime(Number(result.start_time));
-      
-      if (result.start_time < (getUTCNow() / 1000))
-        setStarted(true);
-      else
-        setStarted(false);
-    } else {
-      return;
-    }
-    /* ******************************************* GET PRESALE END TIME ******************************************* */ 
-    result = await getEndPresaleTime(); // get presale end time from smart contract
-
-    if (result.success) {
-      setEndTime(Number(result.end_time));
-    } 
-    /* ******************************************* GET USDT TOKEN PRICE ******************************************* */ 
-    result = await getpTokenPriceForUSDT();
-    if (result.success) {
-      setusdTPrice(result.usdtPrice);
-      tempusdtPrice = Number(result.usdtPrice);
-    } 
-    /* ******************************************* GET TOTAL PRESALE AMOUNT ******************************************* */ 
-    result = await getTotalPresaleAmount();
-    if (result.success) {
-      const percent = ((max_token_amount - Number(50000)) * 100) / max_token_amount; // sale percent
-      setAmountPercent(percent);
-      tempCurPresale = (max_token_amount - Number(50000)) * tempusdtPrice;
-      setCurPresale(tempCurPresale);
-      tempLeftCap = max_token_amount * tempusdtPrice - tempCurPresale;
-      setLeftCap(tempLeftCap);
-    }
-    /* *******************************************  ******************************************* */ 
-    result = await getUserPaidUSDT();
-    if (result.success) {
-      tempPaidUSDT = Number(result.paidUSDT);
-      setPaidUSDT(tempPaidUSDT);
-    }
-    /* ******************************************* BALANCE OF ACCOUNT ******************************************* */ 
-    result = await getBalanceOfAccount();
-    
-    if (result.success) {
-      let fiziBalance = Number(result.fiziBalance);
-      let bnbBalance = Number(result.bnbBalance);
-      let busdBalance = Number(result.busdBalance);
-      let usdtBalance = Number(result.usdtBalance);
-      let wethBalance = Number(result.wethBalance);
-      let wbtcBalance = Number(result.wbtcBalance);
-
-      setFiziBalance(fiziBalance);
-      setBnbBalance(bnbBalance);
-      setBusdBalance(busdBalance);
-      setUsdtBalance(usdtBalance);
-      setWethBalance(wethBalance);
-      setWbtcBalance(wbtcBalance);
-    }
-   
-    if (totalMaxCap <= tempPaidUSDT || tempLeftCap <= 0) {
-      setLoading(false);
-      return;
-    }
-
+    // get day count   
     setLoading(false);
-  }, [web3, max_token_amount, wallet]);
+  }, [web3, wallet]);
 
   const handleTabClick = (index) => {
     setActiveTab(index);
   };
-  
-
-  let subtitle;	
-  const openModal = () => {	
-    setIsOpen(true);
-  }	
-  const afterOpenModal = () => {	
-    // subtitle.style.color = '#f00';	
-  }	
-  const closeModal = () => {	
-    setIsOpen(false);
-  }
-  // arsinoe
-  const handleSelectCoin = async (value) => {
-    setCoinType(value);
-
-    const fromToken = Number(tokenAmountA);
-
-    if (fromToken === 0) {
-      return;
-    }
-
-    if (value === 0) { // BNB
-      const result = await getBUSDForBNB(fromToken);
-
-      if (result.success) {
-        settoBNBPrice(result.value);
-
-        console.log("result.value :", result.value);
-
-        setPFiziAmount(Number(result.value) / usdtPrice);
-      }
-    } else if (value === 1 || value === 2){ // BUSD, USDT
-      setPFiziAmount(fromToken / usdtPrice );
-    } else if (value === 3) { // WETH
-      const result = await getWethPrice();
-
-      if (result.success) {
-        let wethPrice = result.wethPrice / 10 ** 8
-        setPFiziAmount(wethPrice * fromToken / usdtPrice);
-      }
-    } else { // WBTC
-      const result = await getWbtcPrice();
-      if (result.success) {
-        let wbtcPrice = result.wbtcPrice / 10 ** 8
-        setPFiziAmount(wbtcPrice * fromToken / usdtPrice);
-      }
-    }
-  }
 
   const handleChange = async (event) => {
     const value = Number(event.target.value);
 
     setTokenAmountA(event.target.value);
 
-    if (value === 0) {
-      setPFiziAmount(0);
-      settoBNBPrice(0);
+    if (value === 0)
       return;
-    }
-
-    if (coinType === 0) {
-      const result = await getBUSDForBNB(value);
-
-      if (result.success) {
-        settoBNBPrice(result.value);
-        setPFiziAmount(Number(result.value) / usdtPrice);
-      }
-    } else if (coinType === 1 || coinType === 2) {
-      setPFiziAmount(value / usdtPrice);
-    } else if (coinType === 3) {
-      const result = await getWethPrice();
-
-      if (result.success) {
-        let wethPrice = result.wethPrice / 10 ** 8;
-        setPFiziAmount(wethPrice * value / usdtPrice);
-      }
-    } else {
-      const result = await getWbtcPrice();
-
-      if (result.success) {
-        let wbtcPrice = result.wbtcPrice / 10 ** 8;
-        setPFiziAmount(wbtcPrice * value / usdtPrice);
-      }
-    }
   }
 
   const validate = () => {
@@ -681,6 +453,9 @@ const TokenStaking = (props) => {
   }
 
   const handleUnStaking = async () => {
+    if (stakedAmount === 0)
+      return;
+
     setPending(true);
     try {
       const result = await UnstakingToken();
@@ -702,9 +477,30 @@ const TokenStaking = (props) => {
   }
 
   const handleApprove = async () => {
+    if (!validate()) return;
     setPending(true);
     try {
       const result = await approveTokens( tokenAmountA );
+      if (result.success) {
+        getInitAmount();
+        toast.success("Your transaction has been successful.");
+      } else {
+        toast.error("Your Transaction has been failed. " + result.error);
+      }
+    } catch (error) {
+      toast.error("Your Transaction has been failed. " + error);
+    } finally {
+      setPending(false);
+    }
+  }
+
+  const handleClaim = async () => {
+    if (claimToken === 0)
+       return;
+
+    setPending(true);
+    try {
+      const result = await getClaimToken();
       if (result.success) {
         getInitAmount();
         toast.success("Your transaction has been successful.");
@@ -726,91 +522,9 @@ const TokenStaking = (props) => {
   }
 
   useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
-  }, []);
-
-  useEffect(() => {
     getInitAmount();
   }, [getInitAmount]);
-
-  useEffect(() => {
-    const checkCoinType = async () => {
-      if (coinType === 0) {
-        setFromBalance(balance.bnbBalance);
-      } else if (coinType === 1){
-        setFromBalance(balance.busdBalance);
-      } else if (coinType === 2) {
-        setFromBalance(balance.usdtBalance);
-      } else if (coinType === 3) {
-        setFromBalance(balance.wethBalance);
-      } else {
-        setFromBalance(balance.wbtcBalance);
-      }
-      setToBalance(balance.astroBalance);
-    }
-    checkCoinType();
-  }, [balance, coinType]);
-
-  useEffect(() => {
-    const checkEndPresale = async () => {
-      const result = await getEndPresaleTime();
-      if (result.success) {
-        setEndTime(result.end_time);
-      }
-    }
-    if (ended) {
-      checkEndPresale();
-    }
-  }, [ended]);
-
-  useEffect(() => {
-    const checkStartPresale = async () => {
-      const result = await getStartPresaleTime();
-      if (result.success) {
-        if (result.start_time < (getUTCNow() / 1000))
-          setStarted(true);
-        else
-          setStarted(false);
-      }
-    }
-    if (started) {
-      checkStartPresale();
-    }
-  }, [started]);
-
-  const addTokenCallback = useCallback(async () => {
-    const tokenAddress = config.FiziAddress;
-    const tokenSymbol = 'Staik';
-    const tokenDecimals = 18;
-    const tokenImage = `https://raw.githubusercontent.com/traderjoe-xyz/joe-tokenlists/main/logos/${config.AstroAddress}/logo.png`;
-
-    try {
-      const wasAdded = await window.ethereum.request({
-        method: 'wallet_watchAsset',
-        params: {
-          type: 'ERC20',
-          options: {
-            address: tokenAddress,
-            symbol: tokenSymbol,
-            decimals: tokenDecimals,
-            image: tokenImage,
-          },
-        },
-      });
-
-      if (wasAdded) {
-        console.log('Adding Staik token');
-      } else {
-        console.log('Staik token has been added to you wallet!')
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }, [])
-
+  
   return (
     <div className='page-container text-center ico-container'>
       {loading ? (
@@ -826,26 +540,6 @@ const TokenStaking = (props) => {
             <Reveal className='onStep' keyframes={fadeInUp} delay={0} duration={600} triggerOnce>
               <p className='ico-title'>Welcome to the { TOKEN_NAME } Staking</p>
             </Reveal>
-              <Modal
-                isOpen={modalIsOpen}	
-                onAfterOpen={afterOpenModal}
-                onRequestClose={closeModal}
-                style={customStyles}
-                contentLabel="Example Modal"
-                id="howtouse"
-              >	
-                <h2 style={{ fontSize: 31 }} ref={(_subtitle) => (subtitle = _subtitle)}>How to buy on Mobile App</h2>	
-                <button onClick={closeModal} style={{ float: "right", marginTop: "-44px" }} >&#10006;</button>	
-                <div style={{ marginTop: 30 }}>	
-                  <p><span className='font-weight-bold'>Step 1</span>: Open the MetaMask mobile app</p>
-                  <p><span className='font-weight-bold'>Step 2</span>: Click on the "Browser" button at the bottom of the screen</p>
-                  <p><span className='font-weight-bold'>Step 3</span>: Type in the URL of the web3 platform</p>
-                  <p><span className='font-weight-bold'>Step 4</span>: Click on the "Connect" button to allow access to your MetaMask wallet</p>
-                  <p><span className='font-weight-bold'>Step 5</span>: Sign the transaction to connect your wallet to the platform</p>
-                  <p><span className='font-weight-bold'>Step 6</span>: Confirm the transaction</p>
-                  <p>You will now be connected to the web3 platform and can start using its features.</p>
-                  </div>	
-                </Modal>
           </div>
           <Reveal className='main mt-3 onStep' keyframes={fadeIn} delay={800} duration={800} triggerOnce>
             <section className=''>
@@ -859,7 +553,7 @@ const TokenStaking = (props) => {
                             <div className='fs-20 text-left py-4 text-gray-500'>
                               <FontAwesomeIcon icon={faAddressBook} /> &nbsp; Total { TOKEN_NAME } Staked</div>  
                             <div className='presale-input flex'>
-                              <label className=' text-5xl'> { convertNumber(totalStakedAmount) } </label>
+                              <label className='pl-5 text-5xl'> { convertNumber(totalStakedAmount) } </label>
                             </div>
                           </div>
                         </div>
@@ -868,10 +562,10 @@ const TokenStaking = (props) => {
                         <div className='presale-content'>
                           <div className='buy_content'>
                             <div className='fs-20 text-left py-4 text-gray-500'>
-                              <FontAwesomeIcon icon={faChartSimple} /> &nbsp;APY RATE
+                              <FontAwesomeIcon icon={faChartSimple} /> &nbsp;Daily APY RATE
                             </div>  
                             <div className='presale-input flex'>
-                              <label className=' text-5xl'>1.5%</label>
+                              <label className='pl-5 text-5xl'>1.5%</label>
                             </div>
                           </div>
                         </div>
@@ -883,9 +577,8 @@ const TokenStaking = (props) => {
                               <FontAwesomeIcon icon={faUsersViewfinder} /> &nbsp;Stakers
                             </div>  
                             <div className='presale-input flex'>
-                              <label className=' text-5xl'>{ convertNumber(stakedAmount) }</label>
+                              <label className='pl-5 text-5xl'>{ convertNumber(totalStakedAccount) }</label>
                             </div>
-
                           </div>
                         </div>
                       </div>                                       
@@ -1001,7 +694,7 @@ const TokenStaking = (props) => {
                               </div>
                               <div className='col-md-12 mt-3'>
                                 <LoadingButton
-                                  onClick={handleApprove}
+                                  onClick={handleClaim}
                                   endIcon={<></>}
                                   loading={pending}
                                   loadingPosition="end"

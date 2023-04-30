@@ -9,7 +9,7 @@ let wbtc_abi        = require("./ABI/wbtc.json");
 
 export const TOKEN_NAME = "Staik";
 export const TOKEN_CONTRACT_ADDRESS = "0xD1E1B33EC6229F6FDb9d282C580e84273aeaD970";
-export const TOKEN_STAKING_ADDRESS = "0x2204Aaf25D25775954b2bdEAfB15a2F75Ea360e2";
+export const TOKEN_STAKING_ADDRESS = "0x354BC15cB7883089f2D9B3012475b343c3F0A860";
 export const LANGDING_URL = "https://staik.io/"; 
 
 export const config = {

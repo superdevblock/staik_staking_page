@@ -20,3 +20,16 @@ canvas {
 	width: 100% !important;
 	height: 100% !important;
 }
+
+
+.swal2-success-circular-line-left {
+	display: none;
+}
+
+.swal2-success-fix {
+	display: none;
+}
+
+.swal2-success-circular-line-right {
+	display: none;
+}
