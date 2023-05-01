@@ -355,43 +355,22 @@ const TokenStaking = (props) => {
       return;
     }   
     /* ******************************************* GET REWARD TOKEN ******************************************* */ 
-    result = await getLastStakeTime();
+    result = await getLastStakeTime(stakedAmount);
     if (result.success) {
 
       if (result.lastStakeTime === 0 ) {
         setXData([]);
         setYData([]);  
       } else {
-        /// 
-        const diffInseconds = currentTime - lastStakeTime;
-        let diffInDays = diffInseconds / (60 * 60 * 24);
-        diffInDays = parseInt(diffInDays);
-        
-        let labels = [];
-        let rewarddata = [];
-        
-        let startDate = new Date();
-        for (let i = diffInDays; i >= 0; i--) {
-          const currentDayOfMonth = startDate.getDate();
-          startDate.setDate(currentDayOfMonth - 1);
-          labels[i] = startDate.toDateString();
-          
-          rewarddata[i] = stakedAmount + stakedAmount * 0.0015 * i;
-        }
-        
-        console.log(labels);
-        console.log(rewarddata);
-        
-        setXData(labels);
-        setYData(rewarddata);
-        
         setLastStakeTime(Number(result.lastStakeTime));
         setCurrentTime(Number(result.currentTime));
+
+        setXData(result.labels);
+        setYData(result.rewarddata);
       }
     } else {
       return;
     }   
-    // get day count   
     setLoading(false);
   }, [web3, wallet]);
 

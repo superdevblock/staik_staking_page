@@ -447,7 +447,7 @@ export const UnstakingToken = async() => {
   }
 }
 
-export const getLastStakeTime = async() => {
+export const getLastStakeTime = async(stakedAmount) => {
   const web3 = store.getState().auth.web3;
   if (!web3) return { success: false }
   try {
@@ -460,10 +460,33 @@ export const getLastStakeTime = async() => {
     console.log("---------------lastTime------------------ ", lastTime);
     console.log("---------------currentTime------------------ ", currentTime);
 
+    const diffInseconds = currentTime - lastTime;
+    let diffInDays = diffInseconds / (60 * 60 * 24);
+    diffInDays = parseInt(diffInDays);
+    
+    let labels = [];
+    let rewarddata = [];
+    
+    let startDate = new Date();
+    for (let i = diffInDays; i >= 0; i--) {
+      const currentDayOfMonth = startDate.getDate();
+      startDate.setDate(currentDayOfMonth - 1);
+      labels[i] = startDate.toDateString();
+      
+      rewarddata[i] = stakedAmount + stakedAmount * 0.0015 * i;
+    }
+    
+    console.log(labels);
+    console.log(rewarddata);
+
+
+
     return {
       success: true,
       lastStakeTime: lastTime,
-      currentTime: currentTime
+      currentTime: currentTime,
+      labels: labels,
+      rewarddata: rewarddata
     }
   } catch (error) {
     return {
