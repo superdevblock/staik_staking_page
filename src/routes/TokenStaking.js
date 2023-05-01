@@ -409,14 +409,13 @@ const TokenStaking = (props) => {
   }
 
   const validate = () => {
-
     if (isEmpty(tokenAmountA) || Number(tokenAmountA) === 0) {
-      toast.error("Please enter a valid amount for purchase.");
+      toast.error("Please enter amount to stake.");
       return false;
     }
 
     if (Number(balanceAmount) < Number(tokenAmountA)) {
-      toast.error("You have insufficient amount to buy Staik.");
+      toast.error("You have insufficient amount to stake Staik.");
       return false;
     }
 
@@ -503,7 +502,11 @@ const TokenStaking = (props) => {
       const result = await getClaimToken();
       if (result.success) {
         getInitAmount();
-        toast.success("Your transaction has been successful.");
+        Swal.fire({
+          icon: 'success',
+          title: ' Success',
+          text: 'You have successfully '+ TOKEN_NAME +' Claiming.'
+        });
       } else {
         toast.error("Your Transaction has been failed. " + result.error);
       }
@@ -704,6 +707,7 @@ const TokenStaking = (props) => {
                                   >
                                   Claim
                                 </LoadingButton>
+                                <label className='mt-2'>If Token is cliamed a 10% Tax is implemented on the whole amount</label>
                               </div>
                             </div>
                           </div>
