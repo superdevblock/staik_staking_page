@@ -330,6 +330,7 @@ const TokenStaking = (props) => {
     }
     /* ******************************************* GET STAKED TOKEN AMOUNT ******************************************* */ 
     result = await getStakedAmountOfAccount();
+
     if (result.success) {
       if (result.stakedAmount === 0)
         setStarted(false);
@@ -355,23 +356,21 @@ const TokenStaking = (props) => {
       return;
     }   
     /* ******************************************* GET REWARD TOKEN ******************************************* */ 
-    result = await getLastStakeTime(stakedAmount);
-    if (result.success) {
+    console.log("getLastStakeTime(stakedAmount) : ", stakedAmount);
 
-      if (result.lastStakeTime === 0 ) {
-        setXData([]);
-        setYData([]);  
-      } else {
+    result = await getLastStakeTime();
+    if (result.success) {
         setLastStakeTime(Number(result.lastStakeTime));
         setCurrentTime(Number(result.currentTime));
 
+        console.log("result.rewarddata");
+        console.log(result.rewarddata);
+
         setXData(result.labels);
         setYData(result.rewarddata);
-      }
-    } else {
-      return;
-    }   
-    setLoading(false);
+    }
+
+      setLoading(false);
   }, [web3, wallet]);
 
   const handleTabClick = (index) => {
@@ -416,7 +415,7 @@ const TokenStaking = (props) => {
         Swal.fire({
           icon: 'success',
           title: ' Success',
-          text: 'You have successfully '+ TOKEN_NAME +' Staking.'
+          text: 'Welcome to the '+ TOKEN_NAME +', Staking Portal.'
         });
 
         setTokenAmountA(0);
@@ -434,6 +433,14 @@ const TokenStaking = (props) => {
     if (stakedAmount === 0)
       return;
 
+    if (lastStakeTime === 0)
+      return;
+
+    if (( currentTime - lastStakeTime ) < 86400 * 5) {
+      toast.error("After staking, you can not get claim during 5 days.");
+      return;
+    }   
+
     setPending(true);
     try {
       const result = await UnstakingToken();
@@ -442,7 +449,7 @@ const TokenStaking = (props) => {
         Swal.fire({
           icon: 'success',
           title: ' Success',
-          text: 'You have successfully '+ TOKEN_NAME +' Unstaking.'
+          text: 'You have successfully staked your '+ TOKEN_NAME +' Tokens.'
         });
       } else {
         toast.error("Transaction has been failed. " + result.error);
@@ -473,6 +480,16 @@ const TokenStaking = (props) => {
   }
 
   const handleClaim = async () => {
+    console.log("lastStakeTime :", lastStakeTime);
+
+    if (lastStakeTime === 0)
+      return;
+
+    if (( currentTime - lastStakeTime ) < 86400 * 5) {
+      toast.error("After staking, you can not get unstake during 5 days.");
+      return;
+    }
+
     if (claimToken === 0)
        return;
 
@@ -484,7 +501,7 @@ const TokenStaking = (props) => {
         Swal.fire({
           icon: 'success',
           title: ' Success',
-          text: 'You have successfully '+ TOKEN_NAME +' Claiming.'
+          text: 'You have successfully claim your '+ TOKEN_NAME +' Tokens.'
         });
       } else {
         toast.error("Your Transaction has been failed. " + result.error);
@@ -520,7 +537,7 @@ const TokenStaking = (props) => {
         <GlobalStyles />
           <div className='ico-header' style={{width: "100%"}}>
             <Reveal className='onStep' keyframes={fadeInUp} delay={0} duration={600} triggerOnce>
-              <p className='ico-title'>Welcome to the { TOKEN_NAME } Staking</p>
+              <p className='ico-title'>Welcome to the { TOKEN_NAME }, Staking Portal</p>
             </Reveal>
           </div>
           <Reveal className='main mt-3 onStep' keyframes={fadeIn} delay={800} duration={800} triggerOnce>
@@ -547,7 +564,7 @@ const TokenStaking = (props) => {
                               <FontAwesomeIcon icon={faChartSimple} /> &nbsp;Daily APY RATE
                             </div>  
                             <div className='presale-input flex'>
-                              <label className='pl-5 text-5xl'>1.5%</label>
+                              <label className='pl-5 text-5xl'>1.2%</label>
                             </div>
                           </div>
                         </div>
@@ -591,7 +608,7 @@ const TokenStaking = (props) => {
                                 <div className="input-token-panel" style={{ width: "100%"}}>
                                   <div className='flex justify-between'>
                                     <label className="fs-20">Staked Days : </label>
-                                    <span className='fs-20'>360</span>
+                                    <span className='fs-20'>365</span>
                                   </div>
                                   <div className='flex justify-between'>
                                     <label className="fs-20">Staked Amount : </label>
@@ -663,7 +680,10 @@ const TokenStaking = (props) => {
                                     Unstake
                                   </LoadingButton>
                               </div>
-                              <label className='mt-2'>If Token is unstaked a 30% Tax is implemented on the whole amount</label>
+                              <label className='mt-2'>
+                                If Token is unstaked before 270 days, a 30% Tax is implemented on the whole amount<br/>
+                                If Token is unstaked between 270 days ~ 365 days, a 10% Tax is implemented on the whole amount
+                              </label>
                             </div>
                             <div className={activeTab === 2 ? "" : "hidden"}>
                               <div className="presale-input flex">

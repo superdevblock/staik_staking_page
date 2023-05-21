@@ -361,8 +361,6 @@ export const showClaimToken = async() => {
 
     console.log("showClaimToken : ", showClaimToken);
 
-    console.log("showClaimToken :", showClaimToken);
-
     return {
       success: true,
       showClaimToken: showClaimToken
@@ -435,7 +433,6 @@ export const UnstakingToken = async() => {
     await stakingToken.estimateGas({ from: accounts[0] });
     await StakingContract.methods.UnstakingToken().send({ from: accounts[0] });
 
-
     return {
       success: true
     }
@@ -447,40 +444,39 @@ export const UnstakingToken = async() => {
   }
 }
 
-export const getLastStakeTime = async(stakedAmount) => {
+export const getLastStakeTime = async() => {
+
   const web3 = store.getState().auth.web3;
   if (!web3) return { success: false }
   try {
     const accounts = await web3.eth.getAccounts();
-    // get TOKEN balance
     const StakingContract = new web3.eth.Contract(StakingABI, StakingAddress);
+
+    let stakedAmount = await StakingContract.methods.stakedBalance(accounts[0]).call();
+    stakedAmount = web3.utils.fromWei(stakedAmount);
+    // get TOKEN balance
     let lastTime = await StakingContract.methods.lastStakeTime(accounts[0]).call();
     let currentTime = await StakingContract.methods.getCurrentTime().call();
-
-    console.log("---------------lastTime------------------ ", lastTime);
-    console.log("---------------currentTime------------------ ", currentTime);
 
     const diffInseconds = currentTime - lastTime;
     let diffInDays = diffInseconds / (60 * 60 * 24);
     diffInDays = parseInt(diffInDays);
     
+    let startDate = new Date();
     let labels = [];
     let rewarddata = [];
-    
-    let startDate = new Date();
-    for (let i = diffInDays; i >= 0; i--) {
-      const currentDayOfMonth = startDate.getDate();
-      startDate.setDate(currentDayOfMonth - 1);
-      labels[i] = startDate.toDateString();
-      
-      rewarddata[i] = stakedAmount + stakedAmount * 0.0015 * i;
-    }
-    
-    console.log(labels);
-    console.log(rewarddata);
 
+    if (lastTime !== "0") {     
+      for (let i = diffInDays; i >= 0; i--) {
+        const currentDayOfMonth = startDate.getDate();
+        startDate.setDate(currentDayOfMonth - 1);
+        labels[i] = startDate.toDateString();
 
+        rewarddata[i] = parseInt(stakedAmount) + (parseInt(stakedAmount) * 0.0012 * i);
+      }
+    }  
 
+    console.log("rewarddata : ", rewarddata);
     return {
       success: true,
       lastStakeTime: lastTime,
@@ -488,7 +484,7 @@ export const getLastStakeTime = async(stakedAmount) => {
       labels: labels,
       rewarddata: rewarddata
     }
-  } catch (error) {
+  } catch (error) { 
     return {
       success: false,
       error: parseErrorMsg(error.message)
