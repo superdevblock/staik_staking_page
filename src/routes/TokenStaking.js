@@ -437,7 +437,8 @@ const TokenStaking = (props) => {
       return;
 
     if (( currentTime - lastStakeTime ) < 86400 * 5) {
-      toast.error("After staking, you can not get claim during 5 days.");
+    // if (( currentTime - lastStakeTime ) < 100 * 3) {      
+      toast.error("You must hold your tokens for at least 5 days before unstaking.");
       return;
     }   
 
@@ -486,7 +487,8 @@ const TokenStaking = (props) => {
       return;
 
     if (( currentTime - lastStakeTime ) < 86400 * 5) {
-      toast.error("After staking, you can not get unstake during 5 days.");
+    // if (( currentTime - lastStakeTime ) < 100 * 3) {  
+      toast.error("You must hold your tokens for at least 5 days before unstaking");
       return;
     }
 
@@ -612,11 +614,11 @@ const TokenStaking = (props) => {
                                   </div>
                                   <div className='flex justify-between'>
                                     <label className="fs-20">Staked Amount : </label>
-                                    <span className='fs-20'>{ stakedAmount }</span>
+                                    <span className='fs-20'>{ convertNumber(stakedAmount) }</span>
                                   </div>
                                   <div className='flex justify-between'>
                                     <label className="fs-20">Your Balance : </label>
-                                    <span className='fs-20'>{ balanceAmount }</span>
+                                    <span className='fs-20'>{ convertNumber(balanceAmount) }</span>
                                   </div>
                                   <div className='flex justify-between'>
                                     <div className="input-token-panel" style={{ width: "100%"}}>
@@ -628,7 +630,7 @@ const TokenStaking = (props) => {
                                   </div>
                                 </div>
                               </div>
-                              <div className='col-md-12 mt-3'>
+                              <div className='col-md-12 mt-4'>
                                   {(approveState) ?
                                   <LoadingButton
                                     onClick={handleStaking}
@@ -653,21 +655,27 @@ const TokenStaking = (props) => {
                                     Approve
                                   </LoadingButton>}
                               </div>
+                              <br/>
+                              <label>
+                                {
+                                  stakedAmount !== 0 ? "If you stake additional tokens on top of the ones you have already staked (Existing Stakers) your rewards will automatically be claimed and process will reset." : ""
+                                }                               
+                              </label>
                             </div>
                             <div className={activeTab === 1 ? "" : "hidden"}>
                               <div className="presale-input flex">
                                 <div className="input-token-panel" style={{ width: "100%"}}>
                                   <div className='flex justify-between'>
                                     <label className="fs-20">Staked Amount : </label>
-                                    <span className='fs-20'>{ stakedAmount }</span>
+                                    <span className='fs-20'>{ convertNumber(stakedAmount) }</span>
                                   </div>
                                   <div className='flex justify-between'>
                                     <label className="fs-20">Your Balance : </label>
-                                    <span className='fs-20'>{ balanceAmount }</span>
+                                    <span className='fs-20'>{ convertNumber(balanceAmount) }</span>
                                   </div>
                                 </div>
                               </div>
-                              <div className='col-md-12 mt-3'>
+                              <div className='col-md-12 mt-4'>
                                   <LoadingButton
                                     onClick={handleUnStaking}
                                     endIcon={<></>}
@@ -680,6 +688,7 @@ const TokenStaking = (props) => {
                                     Unstake
                                   </LoadingButton>
                               </div>
+                              <br/>
                               <label className='mt-2'>
                                 If Token is unstaked before 270 days, a 30% Tax is implemented on the whole amount<br/>
                                 If Token is unstaked between 270 days ~ 365 days, a 10% Tax is implemented on the whole amount
@@ -690,23 +699,26 @@ const TokenStaking = (props) => {
                                 <div className="input-token-panel" style={{ width: "100%"}}>
                                   <div className='flex justify-between'>
                                     <label className="fs-20">Claimable : </label>
-                                    <span className='fs-20'>{ claimToken }</span>
+                                    <span className='fs-20'>{ convertNumber(claimToken) }</span>
                                   </div>
                                 </div>
                               </div>
                               <div className='col-md-12 mt-3'>
-                                <LoadingButton
-                                  onClick={handleClaim}
-                                  endIcon={<></>}
-                                  loading={pending}
-                                  loadingPosition="end"
-                                  variant="contained"
-                                  className="btn-buy btn-main btn6 m-auto fs-20"
-                                  disabled={!started}
-                                  >
-                                  Claim
-                                </LoadingButton>
-                                <label className='mt-2'>If Token is cliamed a 10% Tax is implemented on the whole amount</label>
+                                <div>
+                                  <LoadingButton
+                                    onClick={handleClaim}
+                                    endIcon={<></>}
+                                    loading={pending}
+                                    loadingPosition="end"
+                                    variant="contained"
+                                    className="btn-buy btn-main btn6 m-auto fs-20"
+                                    disabled={!started}
+                                    >
+                                    Claim
+                                  </LoadingButton>
+                                </div>
+                                <br/>
+                                <label className='mt-2'>There is a 10% tax on total amounts claimed that are fed back into the ecosystem.</label>
                               </div>
                             </div>
                           </div>

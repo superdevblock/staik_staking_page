@@ -10,6 +10,9 @@ let wbtc_abi        = require("./ABI/wbtc.json");
 export const TOKEN_NAME = "Staik";
 export const TOKEN_CONTRACT_ADDRESS = "0x2dFee2792f4b4CC939F8274B60fEaaE756fA941E";
 export const TOKEN_STAKING_ADDRESS = "0x977405CeB99fE83e615BFf163F677D14134a3a79";
+
+// export const TOKEN_CONTRACT_ADDRESS = "0x908bc49111223257C8c5bdD913CFF2d02b613D50";
+// export const TOKEN_STAKING_ADDRESS = "0x54F46c438927DB78D63fA7e0c4D24DFD5CB0EeeE";
 export const LANGDING_URL = "https://staik.io/"; 
 
 export const config = {
@@ -19,17 +22,14 @@ export const config = {
     // mainNetUrl: 'https://data-seed-prebsc-1-s1.binance.org:8545',
     // mainNetUrl: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
     // mainNetUrl: 'https://rinkeby.infura.io/v3/',
-    mainNetUrl: 'https://bsc-dataseed.binance.org/',
-    
-    // PresaleFactoryAddress : "0xD9078f6F4078B37CBAA81C96956e5C6231a62106", // PresaleFactory
-    // PresaleFactoryAbi : presale_abi,
+    mainNetUrl: 'https://bsc-dataseed.binance.org/',   
     
     FiziAddress: TOKEN_CONTRACT_ADDRESS,
     FiziAbi: Token_abi,
     StakingAddress: TOKEN_STAKING_ADDRESS,
     StakingAbi: Staking_abi,
     USDTAddress: '0x55d398326f99059fF775485246999027B3197955',
-    USDTAbi: usdt_abi,    
+    USDTAbi: usdt_abi,
     BUSDAddress: '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56',
     BUSDAbi: busd_abi,
     WETHAddress: '0x2170Ed0880ac9A755fd29B2688956BD959F933F8',

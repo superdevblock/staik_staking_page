@@ -460,6 +460,7 @@ export const getLastStakeTime = async() => {
 
     const diffInseconds = currentTime - lastTime;
     let diffInDays = diffInseconds / (60 * 60 * 24);
+    // let diffInDays = diffInseconds / (100);
     diffInDays = parseInt(diffInDays);
     
     let startDate = new Date();
